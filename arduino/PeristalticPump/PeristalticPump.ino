@@ -1,9 +1,4 @@
 
-#define TUBE_WIDTH_CM 0.75f
-#define MICROSTEPS 32 // when M0/M1/M2 are all on 0V
-#define PUMP_RADIUS_CM 3
-
-
 /* *******************************************************
 /  Libraries
 */
@@ -11,21 +6,27 @@
 #include "LiquidCrystal_I2C.h" // Needed for operating the LCD screen
 #include <TimerOne.h>
 
+#define LED_PIN 13      // the number of Arduino's onboard LED pin
+
+#define MOTOR_STEP_PIN    4
+#define MOTOR_DIR_PIN     5
+#define MOTOR_SLEEP_PIN   6
+
+// These have to be interrupt pins (see http://arduino.cc/en/Reference/attachInterrupt). For the UNO, this means we have to use pin 2 and 3
+#define ROTARY_ENCODER_PINA 2
+#define ROTARY_ENCODER_PINB 3
+
+#define BUTTON_PIN 7
+
+#define MICROSTEPS 32
 
 // Set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27,16,2);
 
 byte ledstate = false; // Blinking indicator LED
-#define LED_PIN 13      // the number of Arduino's onboard LED pin
-
-#define MOTOR_STEP_PIN 2
-#define MOTOR_DIR_PIN 3
-#define MOTOR_SLEEP_PIN 4
-
 
 String buffer;
 uint32_t lastUpdate=0;
-
 
 
 
@@ -45,9 +46,86 @@ uint32_t lastTick = 0; // Global Clock
 #define numberOfHours(_time_) (( _time_% SECS_PER_DAY) / SECS_PER_HOUR)
 #define elapsedDays(_time_) ( _time_ / SECS_PER_DAY)  
 
-
-
 float motorSpeed = 0.0f;
+
+
+//Based on bildr article: http://bildr.org/2012/08/rotary-encoder-arduino/
+volatile int lastEncoded = 0;
+volatile long encoderValue = 0;
+long lastencoderValue = 0;
+int lastMSB = 0;
+int lastLSB = 0;
+
+/* *******************************************************
+/  updateEncoder is the function that reacts to the rotary encoder interrupts
+*/
+void updateEncoder(){
+  int MSB = digitalRead(ROTARY_ENCODER_PINA); //MSB = most significant bit
+  int LSB = digitalRead(ROTARY_ENCODER_PINB); //LSB = least significant bit
+
+  int encoded = (MSB << 1) |LSB; //converting the 2 pin value to single number
+  int sum  = (lastEncoded << 2) | encoded; //adding it to the previous encoded value
+
+  if(sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) encoderValue ++;
+  if(sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) encoderValue --;
+
+  lastEncoded = encoded; //store this value for next time
+}
+
+
+void setupRotaryEncoder() {
+  // Set pinmodes
+  pinMode(ROTARY_ENCODER_PINA, INPUT); 
+  pinMode(ROTARY_ENCODER_PINA, INPUT);
+
+  digitalWrite(ROTARY_ENCODER_PINA, HIGH); //turn pullup resistor on
+  digitalWrite(ROTARY_ENCODER_PINA, HIGH); //turn pullup resistor on
+
+  //call updateEncoder() when any high/low changed seen
+  //on interrupt 0 (pin 2), or interrupt 1 (pin 3)  (see http://arduino.cc/en/Reference/attachInterrupt)
+  attachInterrupt(0, updateEncoder, CHANGE); 
+  attachInterrupt(1, updateEncoder, CHANGE);
+}
+
+void setupLCD() {
+  // Initialize I2C
+  Wire.begin();
+  // Initialize the LCD and print a message
+  lcd.init();
+  lcd.backlight();
+  lcd.clear();
+  lcd.setCursor(0,0);
+  lcd.print(F("BioHack Academy"));
+  lcd.setCursor(0,1);
+  lcd.print(F("Peristaltic Pump"));
+}
+
+void updateLCD()
+{
+//  lcd.clear();  
+  lcd.setCursor(0,0);
+  lcd.print(F("Speed: "));
+  lcd.print( (int)(motorSpeed*60.0f) );
+  lcd.print(F(" rpm   "));
+
+/*  lcd.setCursor(0,1);
+  lcd.print(F("Volume: "));//clear row
+  
+  const float pi =3.141593f;
+  char strbuf[10];
+  dtostrf(0.0f, 4, 2, strbuf);
+
+  lcd.print(strbuf);
+  lcd.print( " cm3/s");*/
+  
+  lcd.setCursor(0,1);
+  lcd.print("rot: ");
+  lcd.print(encoderValue);
+  lcd.print(" btn: ");
+  lcd.print(digitalRead(BUTTON_PIN));
+  lcd.print("   ");
+}
+
 
 void setMotorSpeed(float rps)
 {
@@ -55,32 +133,14 @@ void setMotorSpeed(float rps)
   byte motorDir = rps > 0 ? 1 : 0;
   digitalWrite(MOTOR_DIR_PIN, motorDir);
 
-  lcd.clear();  
-  lcd.setCursor(0,0);
-  lcd.print(F("Speed: "));
-  lcd.print( (int)(rps*60.0f) );
-  lcd.print(F(" rpm"));
-
-  lcd.setCursor(0,1);
-  lcd.print(F("Volume: "));//clear row
-  
-  const float pi =3.141593f;
-  const float tube_area = pi * (TUBE_WIDTH_CM/2)*(TUBE_WIDTH_CM/2);
-   // linear velocity = pump radius * angular velocity in radians
-  float linvel = PUMP_RADIUS_CM * 2*pi*rps;
-  float vol = tube_area * linvel;
-  char strbuf[10];
-  dtostrf(vol, 4, 2, strbuf);
-
-  lcd.print(strbuf);
-  lcd.print( " cm3/s");
+  updateLCD();
     
   // Our motor has 1.8deg per step, so 360/1.8 is 200 steps per revolution
   float stepsPerSecond = 200*rps*MICROSTEPS;
 
   // set period in microseconds
   if (stepsPerSecond != 0) {
-    Timer1.setPeriod(1e6/stepsPerSecond);
+    Timer1.setPeriod(1e6/fabsf(stepsPerSecond));
   }
   
   bool sleepMode = motorSpeed == 0.0f;
@@ -104,34 +164,31 @@ void setup() {
   // Update clock
   lastTick = millis();
 
-  // Initialize I2C
-  Wire.begin();
-
   // Open serial connection and print a message
   Serial.begin(9600);
-  Serial.println(F("BioHack Academy PeristalticPump"));
+  Serial.println(F("BioHack Academy Peristaltic Pump"));
 
   // initialize the LED pin as an output:
   pinMode(LED_PIN, OUTPUT);
   
-  // Initialize the LCD and print a message
-  lcd.init();
-  lcd.backlight();
-  lcd.clear();
-  lcd.setCursor(0,0);
-  lcd.print(F("BioHack Academy"));
-  lcd.setCursor(0,1);
-  lcd.print(F("PeristalticPump"));
+  setupLCD();
   
   pinMode(MOTOR_DIR_PIN,OUTPUT);
   pinMode(MOTOR_STEP_PIN,OUTPUT);
   pinMode(MOTOR_SLEEP_PIN,OUTPUT);
   digitalWrite(MOTOR_SLEEP_PIN,0); // sleep by default
   
+  setupRotaryEncoder();
+  
+  pinMode(BUTTON_PIN,INPUT);
+  digitalWrite(BUTTON_PIN,HIGH); // set internal pull-up. When the button shorts, we see a 0. Otherwise, the internal pull-up resistor will pull the pin high.
+  
   delay(600);
   Timer1.initialize(15000);
   Timer1.attachInterrupt(motorMove); // blinkLED to run every 0.15 seconds
-  lcd.backlight();
+//  lcd.backlight();
+  
+  updateLCD();
 }
 
 
@@ -149,16 +206,16 @@ void loop() {
   digitalWrite(LED_PIN, ledstate); // alternate between 0 and 1   
   
 //  motorMove();
-  delay(100);
-  
-  if (time > lastUpdate + 1000) {
-    Serial.println("...");
+//  delay(100);
+
+  if (time > lastUpdate + 100) {
+  //  Serial.println("...");
     lastUpdate=time;
+    updateLCD();
   }
     
   while (Serial.available()>0) {
     char c = (char)Serial.read();
-  
     if (c == '\n') {
       if (buffer.startsWith("sp")) {
         float sp = buffer.substring(2).toInt()/60.0f;
@@ -174,5 +231,8 @@ void loop() {
     } else buffer+=c;
   }  
 }
+
+
+
 
 
