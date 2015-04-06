@@ -1,3 +1,18 @@
+/*
+Peristaltic Pump:
+
+Commands:
+sp <speed> Set continuous pump rotation speed (rpm)
+rotate <1/10 revolutions> Rotate fixed number of rotations
+configspeed <rpm>
+
+Device chaining:
+Devices can be chained by connecting another device to software serial pins (rx=8 and tx=9)
+Connect the RX pin (8) to the TX pin of the next device, and the TX pin (9) to the RX of the next device (Typically pin 0/1).
+Commands to the next device can be send by prefixing a line with a $ character. 
+Data coming from the chained device is also prefixed and sent into the serial port.
+
+*/
 
 /* *******************************************************
 /  Libraries
@@ -5,6 +20,7 @@
 #include <Wire.h> // Needed for I2C connection
 #include "LiquidCrystal_I2C.h" // Needed for operating the LCD screen
 #include <TimerOne.h>
+#include <SoftwareSerial.h>
 
 #define LED_PIN 13      // the number of Arduino's onboard LED pin
 
@@ -20,6 +36,11 @@
 
 #define MICROSTEPS 32
 
+#define CHAIN_SERIAL_RX_PIN 8
+#define CHAIN_SERIAL_TX_PIN 9
+SoftwareSerial chainedDeviceSerial(CHAIN_SERIAL_RX_PIN, CHAIN_SERIAL_TX_PIN);
+String chainedDeviceBuffer;
+
 // Set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27,16,2);
 
@@ -29,11 +50,8 @@ String buffer;
 uint32_t lastUpdate=0;
 
 
-
-/* *******************************************************
-/  Variables needed for keeping track of time
-*/
-uint32_t lastTick = 0; // Global Clock
+//Variable needed to keep track of time
+uint32_t lastTick = 0; 
 
 /* Useful Constants */
 #define SECS_PER_MIN  (60UL)
@@ -55,6 +73,7 @@ volatile long encoderValue = 0;
 long lastencoderValue = 0;
 int lastMSB = 0;
 int lastLSB = 0;
+
 
 /* *******************************************************
 /  updateEncoder is the function that reacts to the rotary encoder interrupts
@@ -166,7 +185,7 @@ void setup() {
 
   // Open serial connection and print a message
   Serial.begin(9600);
-  Serial.println(F("BioHack Academy Peristaltic Pump"));
+  Serial.println(F("peristaltic-pump"));
 
   // initialize the LED pin as an output:
   pinMode(LED_PIN, OUTPUT);
@@ -189,6 +208,8 @@ void setup() {
 //  lcd.backlight();
   
   updateLCD();
+  
+  chainedDeviceSerial.begin(9600);
 }
 
 
@@ -213,11 +234,26 @@ void loop() {
     lastUpdate=time;
     updateLCD();
   }
+  
+  while (chainedDeviceSerial.available()>0) {
+    char c = (char)chainedDeviceSerial.read();
+    if (c == '\n') {
+      Serial.print("$"); Serial.println(chainedDeviceBuffer);
+      chainedDeviceBuffer = "";
+    } else {
+      if (chainedDeviceBuffer.length()<100)
+        chainedDeviceBuffer += c;
+    }
+  }
     
   while (Serial.available()>0) {
     char c = (char)Serial.read();
     if (c == '\n') {
-      if (buffer.startsWith("sp")) {
+      if (buffer.startsWith("$")) {
+        chainedDeviceSerial.println(buffer.substring(1));
+      } else if(buffer.startsWith("id")) {
+        Serial.println("peristaltic-pump"); // so the bioreactor can figure out what is connected 
+      } else if (buffer.startsWith("sp")) {
         float sp = buffer.substring(2).toInt()/60.0f;
         Serial.print(F("Setting motor speed to "));
         Serial.print(sp, 2);
