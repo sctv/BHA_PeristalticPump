@@ -2,9 +2,9 @@
 Peristaltic Pump:
 
 Commands:
-sp <speed> Set continuous pump rotation speed (rpm)
+ct <speed> Set continuous pump rotation speed (rpm)
 rotate <1/10 revolutions> Rotate fixed number of rotations
-configspeed <rpm>
+speed <rpm>
 
 Device chaining:
 Devices can be chained by connecting another device to software serial pins (rx=8 and tx=9)
@@ -252,8 +252,8 @@ void loop() {
       if (buffer.startsWith("$")) {
         chainedDeviceSerial.println(buffer.substring(1));
       } else if(buffer.startsWith("id")) {
-        Serial.println("peristaltic-pump"); // so the bioreactor can figure out what is connected 
-      } else if (buffer.startsWith("sp")) {
+        Serial.println("id:peristaltic-pump"); // so the bioreactor can figure out what is connected 
+      } else if (buffer.startsWith("ct")) {
         float sp = buffer.substring(2).toInt()/60.0f;
         Serial.print(F("Setting motor speed to "));
         Serial.print(sp, 2);
