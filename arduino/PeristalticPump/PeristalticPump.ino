@@ -2,15 +2,7 @@
 Peristaltic Pump:
 
 Commands:
-ct <speed> Set continuous pump rotation speed (rpm)
-rotate <1/10 revolutions> Rotate fixed number of rotations
-speed <rpm>
-
-Device chaining:
-Devices can be chained by connecting another device to software serial pins (rx=8 and tx=9)
-Connect the RX pin (8) to the TX pin of the next device, and the TX pin (9) to the RX of the next device (Typically pin 0/1).
-Commands to the next device can be send by prefixing a line with a $ character. 
-Data coming from the chained device is also prefixed and sent into the serial port.
+move <speed> Set continuous pump rotation speed (rpm)
 
 */
 
@@ -36,11 +28,6 @@ Data coming from the chained device is also prefixed and sent into the serial po
 
 #define MICROSTEPS 32
 
-#define CHAIN_SERIAL_RX_PIN 8
-#define CHAIN_SERIAL_TX_PIN 9
-SoftwareSerial chainedDeviceSerial(CHAIN_SERIAL_RX_PIN, CHAIN_SERIAL_TX_PIN);
-String chainedDeviceBuffer;
-
 // Set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27,16,2);
 
@@ -65,7 +52,8 @@ uint32_t lastTick = 0;
 #define elapsedDays(_time_) ( _time_ / SECS_PER_DAY)  
 
 float motorSpeed = 0.0f;
-
+volatile bool continuousMode = false;
+volatile int stepsTodo = 0;
 
 //Based on bildr article: http://bildr.org/2012/08/rotary-encoder-arduino/
 volatile int lastEncoded = 0;
@@ -97,9 +85,6 @@ void setupRotaryEncoder() {
   pinMode(ROTARY_ENCODER_PINA, INPUT); 
   pinMode(ROTARY_ENCODER_PINA, INPUT);
 
-  digitalWrite(ROTARY_ENCODER_PINA, HIGH); //turn pullup resistor on
-  digitalWrite(ROTARY_ENCODER_PINA, HIGH); //turn pullup resistor on
-
   //call updateEncoder() when any high/low changed seen
   //on interrupt 0 (pin 2), or interrupt 1 (pin 3)  (see http://arduino.cc/en/Reference/attachInterrupt)
   attachInterrupt(0, updateEncoder, CHANGE); 
@@ -124,7 +109,7 @@ void updateLCD()
 //  lcd.clear();  
   lcd.setCursor(0,0);
   lcd.print(F("Speed: "));
-  lcd.print( (int)(motorSpeed*60.0f) );
+  lcd.print( (int)(motorSpeed) );
   lcd.print(F(" rpm   "));
 
 /*  lcd.setCursor(0,1);
@@ -140,22 +125,20 @@ void updateLCD()
   lcd.setCursor(0,1);
   lcd.print("rot: ");
   lcd.print(encoderValue);
-  lcd.print(" btn: ");
-  lcd.print(digitalRead(BUTTON_PIN));
   lcd.print("   ");
 }
 
 
-void setMotorSpeed(float rps)
+void setMotorSpeed(float rpm)
 {
-  motorSpeed=rps;
-  byte motorDir = rps > 0 ? 1 : 0;
+  motorSpeed=rpm;
+  byte motorDir = rpm > 0 ? 1 : 0;
   digitalWrite(MOTOR_DIR_PIN, motorDir);
 
   updateLCD();
-    
+
   // Our motor has 1.8deg per step, so 360/1.8 is 200 steps per revolution
-  float stepsPerSecond = 200*rps*MICROSTEPS;
+  float stepsPerSecond = 200*rpm/60.0f*MICROSTEPS;
 
   // set period in microseconds
   if (stepsPerSecond != 0) {
@@ -208,8 +191,6 @@ void setup() {
 //  lcd.backlight();
   
   updateLCD();
-  
-  chainedDeviceSerial.begin(9600);
 }
 
 
@@ -230,30 +211,23 @@ void loop() {
 //  delay(100);
 
   if (time > lastUpdate + 100) {
-  //  Serial.println("...");
+
+    if (encoderValue != 0) {
+      setMotorSpeed(motorSpeed + encoderValue); 
+      encoderValue=0;  
+    }
+    
+    
     lastUpdate=time;
     updateLCD();
   }
   
-  while (chainedDeviceSerial.available()>0) {
-    char c = (char)chainedDeviceSerial.read();
-    if (c == '\n') {
-      Serial.print("$"); Serial.println(chainedDeviceBuffer);
-      chainedDeviceBuffer = "";
-    } else {
-      if (chainedDeviceBuffer.length()<100)
-        chainedDeviceBuffer += c;
-    }
-  }
-    
   while (Serial.available()>0) {
     char c = (char)Serial.read();
     if (c == '\n') {
-      if (buffer.startsWith("$")) {
-        chainedDeviceSerial.println(buffer.substring(1));
-      } else if(buffer.startsWith("id")) {
+      if(buffer.startsWith("id")) {
         Serial.println("id:peristaltic-pump"); // so the bioreactor can figure out what is connected 
-      } else if (buffer.startsWith("ct")) {
+      } else if (buffer.startsWith("move")) {
         float sp = buffer.substring(2).toInt()/60.0f;
         Serial.print(F("Setting motor speed to "));
         Serial.print(sp, 2);
