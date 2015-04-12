@@ -83,7 +83,7 @@ void updateEncoder(){
 void setupRotaryEncoder() {
   // Set pinmodes
   pinMode(ROTARY_ENCODER_PINA, INPUT); 
-  pinMode(ROTARY_ENCODER_PINA, INPUT);
+  pinMode(ROTARY_ENCODER_PINB, INPUT);
 
   //call updateEncoder() when any high/low changed seen
   //on interrupt 0 (pin 2), or interrupt 1 (pin 3)  (see http://arduino.cc/en/Reference/attachInterrupt)
