@@ -206,18 +206,12 @@ void loop() {
   
   ledstate = 1-ledstate;
   digitalWrite(LED_PIN, ledstate); // alternate between 0 and 1   
-  
-//  motorMove();
-//  delay(100);
 
   if (time > lastUpdate + 100) {
-
     if (encoderValue != 0) {
       setMotorSpeed(motorSpeed + encoderValue); 
       encoderValue=0;  
     }
-    
-    
     lastUpdate=time;
     updateLCD();
   }
