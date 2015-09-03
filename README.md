@@ -1,3 +1,10 @@
 # BHA_PeristalticPump
 
-Documentation: http://biohackacademy.github.io/biofactory/class/8-pumps/
+* Arduino Code
+* Bill of Materials
+* Fritzing wiring scheme
+* Sketchup file
+
+Archive contains:
+
+* BHA 2015-1 "BioFactory" Design
