@@ -2,7 +2,7 @@
 
 You will need an Arduino UNO or similar microprocessor.
 
-### Must have 
+### Components that are needed without using a Biohack Board
 
 |No|Amount|Description|Supplier NL|Cost|
 | ------------: | ------------: | :------------ | :------------ | ------------: |
@@ -20,15 +20,22 @@ You will need an Arduino UNO or similar microprocessor.
 |11|2|100nF capacitor|[EOO](http://www.eoo-bv.nl/index.php?_a=viewProd&productId=13443)|0.24|
 |12|1|12V 5A Power supply|[Farnell](http://nl.farnell.com/ideal-power/66ms-00120500-s01-v/psu-12v-5a-earthed-output/dp/2112013), [EOO](http://www.eoo-bv.nl/index.php?_a=viewProd&productId=13247)|20.00|
 |13|4|Rubber feet|[Conrad](https://www.conrad.nl/nl/toolcraft-elastische-buffer-zelfklevend-pd2104sw-x-h-10-mm-x-4-mm-zwart-1-stuks-401489.html)|0.08|
+|14|1|I2C LCD 16x2 Display|[iPrototype](https://iprototype.nl/products/components/led-lcd/lcd16x2-I2C-BL), ([HobbyElectronica](http://www.hobbyelectronica.nl/product/hd44780-16x2-karakters-lcd-display-module-blauw-backlight/) + [HobbyElectronica](http://www.hobbyelectronica.nl/product/i2c-lcd-interface-voor-16x2-en-20x4-displays/))|16.95|
 
-* You will also need 3mm MDF, some M3 10 mm bolts and nuts, some M3 20mm bolts and some M3 30mm bolts
-
-### Nice to have
+### Components that are needed on top of the Biohack Board
 
 |No|Amount|Description|Supplier NL|Cost|
 | ------------: | ------------: | :------------ | :------------ | ------------: |
-|1|1|I2C LCD 16x2 Display|[iPrototype](https://iprototype.nl/products/components/led-lcd/lcd16x2-I2C-BL), ([HobbyElectronica](http://www.hobbyelectronica.nl/product/hd44780-16x2-karakters-lcd-display-module-blauw-backlight/) + [HobbyElectronica](http://www.hobbyelectronica.nl/product/i2c-lcd-interface-voor-16x2-en-20x4-displays/))|16.95|
+|1|1|NEMA17 Stepper motor|[RepRapWorld](http://reprapworld.com/?products_details&products_id=94&cPath=1614)|12.50|
+|2|2|Bearing 608ZZ|[RepRapWorld](http://reprapworld.com/?products_details&products_id/24/cPath/1595_1596)|0.25|
+|3|1|Heatsink|[RepRapWorld](http://reprapworld.com/?products_details&products_id/67/cPath/1591_1600)|1.25|
+|4|1|10 pack washers|[RepRapWorld](http://reprapworld.com/?products_details&products_id/241/cPath/1595_1597_1634)|1.99|
+|5|1|Fan 40x40mm|[EOO](http://www.eoo-bv.nl/index.php?_a=viewProd&productId=14963)|1.55|
+|6|1|Rotary encoder|[Farnell](http://nl.farnell.com/alps/ec12e1240406/encoder-vertical-12mm-12det-12ppr/dp/2065052), [EOO](http://www.eoo-bv.nl/index.php?_a=viewProd&productId=9553)|0.60|
+|7|1|Knob|[Farnell](http://nl.farnell.com/multicomp/cr-r4-7/knob-soft-touch-d-shaft-black/dp/1440012?ost=1440012), ([EOO](http://www.eoo-bv.nl/index.php?_a=viewProd&productId=6065) + [EOO](http://www.eoo-bv.nl/index.php?_a=viewProd&productId=11139))|0.23|
+|8|1|12V 5A Power supply|[Farnell](http://nl.farnell.com/ideal-power/66ms-00120500-s01-v/psu-12v-5a-earthed-output/dp/2112013), [EOO](http://www.eoo-bv.nl/index.php?_a=viewProd&productId=13247)|20.00|
+|9|4|Rubber feet|[Conrad](https://www.conrad.nl/nl/toolcraft-elastische-buffer-zelfklevend-pd2104sw-x-h-10-mm-x-4-mm-zwart-1-stuks-401489.html)|0.08|
+|10|1|I2C LCD 16x2 Display|[iPrototype](https://iprototype.nl/products/components/led-lcd/lcd16x2-I2C-BL), ([HobbyElectronica](http://www.hobbyelectronica.nl/product/hd44780-16x2-karakters-lcd-display-module-blauw-backlight/) + [HobbyElectronica](http://www.hobbyelectronica.nl/product/i2c-lcd-interface-voor-16x2-en-20x4-displays/))|16.95|
 
-**Alternatives**
+* You will also need 3mm MDF, some M3 10 mm bolts and nuts, some M3 20mm bolts and some M3 30mm bolts
 
-* 
