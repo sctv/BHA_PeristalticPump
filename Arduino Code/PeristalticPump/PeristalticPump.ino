@@ -121,6 +121,7 @@ const byte PIN_MOSFET1 = 6;
 int mosfet_switch_timer=0;
 byte mosfet_index=0;
 
+int speed = 0;
 
 void scanI2C()
 {
@@ -169,7 +170,7 @@ void setup() {
 
 void updateLCD()
 {
-//  lcd.clear();  
+//  lcd.clear(); 
   lcd.setCursor(0,0);
   lcd.print(F("Speed: "));
   lcd.print( rotaryEncoderA.getValue() );
