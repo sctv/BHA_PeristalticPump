@@ -9,7 +9,7 @@ Make sure you have an Arduino or equivalent microprocessor, big enough sheets of
 |1|1|NEMA17 Stepper motor|[RepRapWorld](http://reprapworld.com/?products_details&products_id=94&cPath=1614)|12.50|
 |2|1|Pololu DRV8825 Stepper Driver|[RepRapWorld](http://reprapworld.com/?products_details&products_id=356)|11.99|
 |3|2|Bearing 608ZZ|[RepRapWorld](http://reprapworld.com/?products_details&products_id/24/cPath/1595_1596)|0.25|
-|4|1|100 uF capacitor|[RepRapWorld](http://reprapworld.com/?products_details&products_id=45&cPath=1591_1600_1603)|0.20|
+|4|1|100 uF capacitor|[RepRapWorld](http://reprapworld.com/?products_details&products_id=45&cPath=1591_1600_1603), [Farnell](http://nl.farnell.com/panasonic-electronic-components/eeufr1c101/cap-alu-elec-100uf-16v-rad/dp/1907228)|0.20|
 |5|1|Heatsink|[RepRapWorld](http://reprapworld.com/?products_details&products_id/67/cPath/1591_1600)|1.25|
 |6|1|10 pack washers|[RepRapWorld](http://reprapworld.com/?products_details&products_id/241/cPath/1595_1597_1634)|1.99|
 |6|1|Fan 40x40mm|[EOO](http://www.eoo-bv.nl/index.php?_a=viewProd&productId=14963)|1.55|
@@ -21,8 +21,9 @@ Make sure you have an Arduino or equivalent microprocessor, big enough sheets of
 |12|1|12V 5A Power supply|[Farnell](http://nl.farnell.com/ideal-power/jyh32-1205000/adaptor-ac-dc-desktop-12v-5a/dp/2532631), [EOO](http://www.eoo-bv.nl/index.php?_a=viewProd&productId=13247)|38.13|
 |13|4|Rubber feet|[Conrad](https://www.conrad.nl/nl/toolcraft-elastische-buffer-zelfklevend-pd2104sw-x-h-10-mm-x-4-mm-zwart-1-stuks-401489.html)|0.08|
 |14|1|I2C LCD display|[iPrototype](https://iprototype.nl/products/components/led-lcd/lcd16x2-I2C-BL), [Hackerstore](https://www.hackerstore.nl/Artikel/82)|8.95|
+|15|1|Breadboard|[Farnell](http://nl.farnell.com/pro-signal/psg-bb-400/breadboard-400-pin-white/dp/2503765). [iPrototype](https://iprototype.nl/products/accessoires/breadboards-prints/halfbreadboard)|2.56|
 
-*Estimate total*: EUR 77.85
+*Estimate total*: EUR 80.41
 
 ### Components that are needed on top of the Biohack Board
 
