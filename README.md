@@ -1,6 +1,6 @@
 #BHA_PeristalticPump
 
-This repo contains the designs and source files of a **DIY Centrifuge**. This device can be used to isolate compounds from a liquid. Check out the corresponding [BHA lecture in the Syllabus](http://biohackacademy.github.io) for more information.
+This repo contains the designs and source files of a **Peristaltic Pump**. This device can be used to isolate compounds from a liquid. Check out the corresponding [BHA lecture in the Syllabus](http://biohackacademy.github.io) for more information.
 
 ##Navigation the repo
 
